@@ -21,6 +21,11 @@ ARG DEV=false
 RUN python -m venv /py && \
 # Upgrade pip in the virtual environment
     /py/bin/pip install --upgrade pip && \
+# Install pacakage dependency for postgresql package
+    apk add --update --no-cache postgresql-client && \
+# Creates a virtual dependency package
+    apk add --update --no-cache --virtual .tmp-build-deps \
+        build-base postgresql-dev musl-dev && \
 # Install the packages in the requirements.txt file
     /py/bin/pip install -r /tmp/requirements.txt && \
 # If DEV argument is true, install the requirements.dev.txt packages
@@ -29,6 +34,8 @@ RUN python -m venv /py && \
     fi && \
 # Remove the tmp directory
     rm -rf /tmp && \
+# Removes the virtual dependency packages
+    apk del .tmp-build-deps && \
 # Create a User named 'django-user', with password disabled, and doesn't create a home directory for the user.
     adduser \
         --disabled-password \
